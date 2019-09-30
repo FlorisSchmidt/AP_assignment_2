@@ -163,7 +163,16 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
     }
 
     @Override
+    // current implementation makes shallow copy
     public ListInterface<E> copy() {
-        return null;
+        Node oldCurrent = current;
+        LinkedList<E> listCopy = new LinkedList<>();
+        goToFirst();
+        for (int i = 0; i < size; i++) {
+            listCopy.insert(current.data);
+            goToNext();
+        }
+        current = oldCurrent;
+        return listCopy;
     }
 }
