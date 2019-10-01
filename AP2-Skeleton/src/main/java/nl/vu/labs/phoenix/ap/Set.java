@@ -5,7 +5,7 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 	private LinkedList<T> setList;
 	private int size;
 
-	private Set() {
+	Set() {
 		setList = new LinkedList<>();
 		init();
 	}
@@ -55,63 +55,67 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 
 	@Override
 	public boolean contains(T t) {
-		if (setList.find(t)) return true;
-		return false;
+		return setList.find(t);
 	}
 
 	@Override
 	public SetInterface<T> copy() {
-		Set s = new Set(setList);
-		return s;
+		return new Set<T>(setList);
 		}
 
 
 	@Override
-	public SetInterface union(SetInterface s) {
+	public SetInterface<T> union(SetInterface<T> s) {
 		SetInterface<T> union = copy();
 		SetInterface<T> subject = s.copy();
+		for (int i = 0; i < s.size(); i++) {
+			T type = subject.get();
+			union.add(type);
+		}
 		return union;
 	}
 
 	@Override
-	public SetInterface difference(SetInterface s) {
-		Set differences = new Set();
-		Set subject = new Set(this);
+	public SetInterface<T> difference(SetInterface<T> s) {
+		Set<T> differences = new Set<>();
+		Set<T> subject = new Set<>(setList);
 		for (int i = 0; i < size; i++) {
-			Identifier idt = subject.get();
-			if (!s.contains(idt)) {
-				differences.add(idt);
+			T element = subject.get();
+			if (!s.contains(element)) {
+				differences.add(element);
 			}
 		}
 		return differences;
 	}
 
 	@Override
-	public SetInterface intersection(SetInterface s) {
-		Set intersect = new Set();
-		Set subject = new Set(this);
+	public SetInterface<T> intersection(SetInterface<T> s) {
+		Set<T> intersect = new Set<>();
+		Set<T> subject = new Set<>(setList);
 		for (int i = 0; i < size; i++) {
-			Identifier idt = subject.get();
-			if (s.contains(idt)) {
-				intersect.add(idt);
+			T element = subject.get();
+			if (s.contains(element)) {
+				intersect.add(element);
 			}
 		}
 		return intersect;
 	}
 
 	@Override
-	public SetInterface symDifference(SetInterface s) {
-		Set symDif = new Set();
-		Set subject = new Set(this);
-		Set comparand = new Set(s);
+	public SetInterface<T> symDifference(SetInterface<T> s) {
+		Set<T> symDif = new Set<>();
+		Set<T> subject = new Set<>(setList);
+		Set<T> comparand = (Set<T>) s.copy();
 		for (int i = 0; i < size; i++) {
-			Identifier subIdt = subject.get();
-			Identifier comIdt = comparand.get();
-			if (!s.contains(subIdt)) {
-				symDif.add(subIdt);
+			T subElement = subject.get();
+			if (!s.contains(subElement)) {
+				symDif.add(subElement);
 			}
-			if (!contains(comIdt)) {
-				symDif.add(comIdt);
+		}
+		for (int j = 0; j< s.size(); j++) {
+			T compElement = comparand.get();
+			if (!contains(compElement)) {
+				symDif.add(compElement);
 			}
 		}
 		return symDif;
