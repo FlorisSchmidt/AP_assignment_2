@@ -46,22 +46,22 @@ public interface SetInterface<T> {
 
 	SetInterface<T> copy();
 
-	SetInterface union(SetInterface s);
+	SetInterface<T> union(SetInterface<T> s);
     /*  PRE -
         POST - A set containing the union of the argument set and this.
      */
 
-	SetInterface difference(SetInterface s);
+	SetInterface<T> difference(SetInterface<T> s);
     /*  PRE -
         POST - A set containing the difference of the argument and this.
      */
 
-	SetInterface intersection(SetInterface s);
+	SetInterface<T> intersection(SetInterface<T> s);
     /*  PRE -
         POST - A set containing the intersection of the argument and this.
      */
 
-	SetInterface symDifference(SetInterface s);
+	SetInterface<T> symDifference(SetInterface<T> s);
     /*  PRE -
         POST - A set containing the symmetric difference between the argument set
      */
