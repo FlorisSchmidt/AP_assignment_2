@@ -16,66 +16,163 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
             this.prior = prior;
             this.next = next;
         }
+    }
 
+    private Node current;
+    private int size;
+
+    public LinkedList() {
+        init();
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return current == null;
     }
 
     @Override
     public ListInterface<E> init() {
-        return null;
+        current = null;
+        size = 0;
+        return this;
     }
 
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
     public ListInterface<E> insert(E d) {
-        return null;
+        if (isEmpty()) {
+            current = new Node(d);
+            size++;
+            return this;
+        }
+        goToFirst();
+        if (current.data.compareTo(d) >= 0) insertHead(d);
+        else {
+            iterate(d);
+            if (isTail() || size == 1) insertTail(d);
+            else {
+                current.next = new Node(d, current, current.next);
+                current = current.next;
+                current.next.prior = current;
+
+            }
+        }
+
+
+        size++;
+        return this;
+    }
+
+    // lets current point to node preceding the insertion position
+    private void iterate(E d) {
+        while(!(current.next == null)) {
+            if (current.next.data.compareTo(d) <= 0) {
+                goToNext();
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+
+    private void insertHead(E d) {
+        current.prior = new Node(d,null,current);
+        current = current.prior;
+    }
+
+    private void insertTail(E d) {
+        current.next = new Node(d,current, null);
+        current = current.next;
+    }
+
+    private boolean isHead() {
+        return !isEmpty() && current.prior == null;
+    }
+
+    private boolean isTail() {
+        return !isEmpty() && !isHead() && current.next == null;
     }
 
     @Override
     public E retrieve() {
-        return null;
+        return current.data;
     }
 
     @Override
     public ListInterface<E> remove() {
-        return null;
+        if (size == 1) {
+            init();
+            return this;
+        }
+        else if (current.next == null) {
+            current = current.prior;
+        }
+        else {
+            Node currentPrior = current.prior;
+            current = current.next;
+            current.prior = currentPrior;
+            }
+        size--;
+        return this;
     }
 
     @Override
     public boolean find(E d) {
+        goToFirst();
+        while(current.next != null) {
+           if(current.data.compareTo(d) == 0) return true;
+           goToNext();
+        }
         return false;
     }
 
     @Override
     public boolean goToFirst() {
-        return false;
+        if (isEmpty()) return false;
+        while(goToPrevious()) {
+        }
+        return true;
     }
 
     @Override
     public boolean goToLast() {
-        return false;
+        if (isEmpty()) return false;
+        while(goToNext()) {}
+        return true;
     }
 
     @Override
     public boolean goToNext() {
-        return false;
+        if (isEmpty()) return false;
+        if (current.next == null) return false;
+        current = current.next;
+        return true;
     }
 
     @Override
     public boolean goToPrevious() {
-        return false;
+        if (isEmpty()) return false;
+        if (current.prior == null) return false;
+        current = current.prior;
+        return true;
     }
 
     @Override
+    // current implementation makes shallow copy
     public ListInterface<E> copy() {
-        return null;
+        Node oldCurrent = current;
+        LinkedList<E> listCopy = new LinkedList<>();
+        goToFirst();
+        for (int i = 0; i < size; i++) {
+            listCopy.insert(current.data);
+            goToNext();
+        }
+        current = oldCurrent;
+        return listCopy;
     }
 }

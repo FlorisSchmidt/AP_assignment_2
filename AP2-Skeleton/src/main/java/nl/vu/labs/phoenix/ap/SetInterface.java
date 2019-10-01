@@ -1,46 +1,69 @@
 package nl.vu.labs.phoenix.ap;
 
-/* [1] Set Specification
- * 	   -- Complete the specification for a set interface.
- * 		  See the List interface for inspiration
+/*
+ * Elements: Objects of type T.
+ * Structure: none
+ * Domain: All elements must be unique.
+ *
+ * constructors
+ *
+ * Set();
+ *   PRE  -
+ *   POST - A new Set-object has been made and contains the empty set.
+ *
  */
 public interface SetInterface<T> {
-	
-	/* 
-	 * [2] Mandatory methods. Make sure you do not modify these!
-	 * 	   -- Complete the specifications of these methods
-	 */
-	
-	/**
-	 * Hint:
-	 * @return
-	 * 	true  - element was inserted
-	 * 	false - element was already present 
-	 */
+
+	/*  PRE -
+       POST - The set is empty
+    */
+	void init();
+
+	/*  PRE - The size of the set is less than 20
+        POST - The element has been added to the set
+               @return  True: if element has been added
+                        False: if element has not been added
+     */
 	boolean add(T t);
-	
+
+
+	/*  PRE - The set is not empty
+        POST - Returns and removes an element from the set
+     */
 	T get();
-	
+
+	/*  PRE - The set is not empty
+        POST - Returns and removes specified element from the set
+     */
 	boolean remove(T t);
-	
+
+	/*  PRE -
+       POST - The amount of elements in the set has been returned
+    */
 	int size();
-	
+
+	boolean contains(T t);
+
 	SetInterface<T> copy();
-	
-	/*
-	 * [3] Methods for set operations 
-	 * 	   -- Add methods to perform the 4 basic set operations 
-	 * 		  (union, intersection, difference, symmetric difference)
-	 */
-	
-	
-	// your code here
-	
-	
-	/* 
-	 * [4] Add anything else you think belongs to this interface 
-	 */
-	
-	// your code here
-	
+
+	SetInterface union(SetInterface s);
+    /*  PRE -
+        POST - A set containing the union of the argument set and this.
+     */
+
+	SetInterface difference(SetInterface s);
+    /*  PRE -
+        POST - A set containing the difference of the argument and this.
+     */
+
+	SetInterface intersection(SetInterface s);
+    /*  PRE -
+        POST - A set containing the intersection of the argument and this.
+     */
+
+	SetInterface symDifference(SetInterface s);
+    /*  PRE -
+        POST - A set containing the symmetric difference between the argument set
+     */
 }
+
