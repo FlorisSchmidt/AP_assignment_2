@@ -25,7 +25,7 @@ public interface IdentifierInterface {
 	 * POST - Identifier has one char
 	 */
 
-	boolean add(char c);
+	boolean add(char c) throws IdentifierException;
 	/*
 	 * PRE -
 	 * POST - true: the char falls inside the domain and is added

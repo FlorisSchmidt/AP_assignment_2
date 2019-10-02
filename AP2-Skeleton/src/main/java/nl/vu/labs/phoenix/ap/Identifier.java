@@ -28,7 +28,7 @@ public class Identifier implements IdentifierInterface {
 	}
 
 	@Override
-	public boolean add(char c) {
+	public boolean add(char c) throws IdentifierException{
 		if(testDomain(c) && addWasCalled) {
 			sb.append(c);
 			return true;
@@ -42,11 +42,14 @@ public class Identifier implements IdentifierInterface {
 		return false;
 	}
 
-	private boolean testDomain(char c) {
+	private boolean testDomain(char c) throws IdentifierException {
 		if(!addWasCalled && Character.isDigit(c)) {
-			return false;
+			throw new IdentifierException("first element can't be a digit");
 		}
-		return Character.isDigit(c) || Character.isLowerCase(c) || Character.isUpperCase(c);
+		if(!Character.isDigit(c) && !Character.isLowerCase(c) && !Character.isUpperCase(c)){ //TODO this is never called!
+			throw new IdentifierException("unsupported character '" + c + "'");
+		}
+		return true;
 	}
 
 	@Override
