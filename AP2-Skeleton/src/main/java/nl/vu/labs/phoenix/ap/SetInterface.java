@@ -12,7 +12,7 @@ package nl.vu.labs.phoenix.ap;
  *   POST - A new Set-object has been made and contains the empty set.
  *
  */
-public interface SetInterface<T> {
+public interface SetInterface<T extends Comparable<T>> {
 
 	/*  PRE -
        POST - The set is empty

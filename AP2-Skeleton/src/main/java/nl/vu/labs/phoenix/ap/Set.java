@@ -2,7 +2,7 @@ package nl.vu.labs.phoenix.ap;
 
 public class Set<T extends Comparable<T>> implements SetInterface<T> {
 
-	private LinkedList<T> setList;
+	private ListInterface<T> setList;
 	private int size;
 
 	Set() {
@@ -11,7 +11,7 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 	}
 
 	private Set(ListInterface<T> l) {
-		setList = (LinkedList<T>) l.copy();
+		setList = l.copy();
 		size = l.size();
 	}
 
@@ -31,16 +31,13 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 
 	@Override
 	public T get() {
-		T element =  setList.retrieve();
-		setList.remove();
-		size--;
-		return element;
+		return setList.retrieve();
 	}
 
 	@Override
 	public boolean remove(T t) {
 		if (!setList.find(t)) return false;
-		else if (t.equals(setList.retrieve())) {
+		if (t.equals(setList.retrieve())) {
 			setList.remove();
 			size--;
 			return true;
@@ -69,8 +66,9 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 		SetInterface<T> union = copy();
 		SetInterface<T> subject = s.copy();
 		for (int i = 0; i < s.size(); i++) {
-			T type = subject.get();
-			union.add(type);
+			T element = subject.get();
+			subject.remove(element);
+			union.add(element);
 		}
 		return union;
 	}
@@ -81,6 +79,7 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 		Set<T> subject = new Set<>(setList);
 		for (int i = 0; i < size; i++) {
 			T element = subject.get();
+			subject.remove(element);
 			if (!s.contains(element)) {
 				differences.add(element);
 			}
@@ -94,6 +93,7 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 		Set<T> subject = new Set<>(setList);
 		for (int i = 0; i < size; i++) {
 			T element = subject.get();
+			subject.remove(element);
 			if (s.contains(element)) {
 				intersect.add(element);
 			}
@@ -107,15 +107,17 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 		Set<T> subject = new Set<>(setList);
 		Set<T> comparand = (Set<T>) s.copy();
 		for (int i = 0; i < size; i++) {
-			T subElement = subject.get();
-			if (!s.contains(subElement)) {
-				symDif.add(subElement);
+			T subjectElement = subject.get();
+			subject.remove(subjectElement);
+			if (!s.contains(subjectElement)) {
+				symDif.add(subjectElement);
 			}
 		}
 		for (int j = 0; j< s.size(); j++) {
-			T compElement = comparand.get();
-			if (!contains(compElement)) {
-				symDif.add(compElement);
+			T comparandElement = comparand.get();
+			comparand.remove(comparandElement);
+			if (!contains(comparandElement)) {
+				symDif.add(comparandElement);
 			}
 		}
 		return symDif;

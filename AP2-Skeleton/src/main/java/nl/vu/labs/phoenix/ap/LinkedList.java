@@ -44,41 +44,26 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
 
     @Override
     public ListInterface<E> insert(E d) {
+        find(d);
         if (isEmpty()) {
             current = new Node(d);
-            size++;
-            return this;
         }
-        goToFirst();
-        if (current.data.compareTo(d) >= 0) insertHead(d);
+        else if (isHead() && d.compareTo(current.data) <= 0) {
+           insertHead(d);
+           size ++;
+           return this;
+        }
+        else if (isTail() && d.compareTo(current.data) >= 0)  {
+            insertTail(d);
+        }
         else {
-            iterate(d);
-            if (isTail() || size == 1) insertTail(d);
-            else {
-                current.next = new Node(d, current, current.next);
-                current = current.next;
-                current.next.prior = current;
-
-            }
+            current.next = new Node(d, current, current.next);
+            current = current.next;
+            current.next.prior = current;
         }
-
-
         size++;
         return this;
     }
-
-    // lets current point to node preceding the insertion position
-    private void iterate(E d) {
-        while(!(current.next == null)) {
-            if (current.next.data.compareTo(d) <= 0) {
-                goToNext();
-            }
-            else {
-                break;
-            }
-        }
-    }
-
 
     private void insertHead(E d) {
         current.prior = new Node(d,null,current);
@@ -95,7 +80,7 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
     }
 
     private boolean isTail() {
-        return !isEmpty() && !isHead() && current.next == null;
+        return !isEmpty() && current.next == null;
     }
 
     @Override
@@ -111,6 +96,7 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
         }
         else if (current.next == null) {
             current = current.prior;
+            current.next = null;
         }
         else {
             Node currentPrior = current.prior;
@@ -123,12 +109,32 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
 
     @Override
     public boolean find(E d) {
-        goToFirst();
-        while(current.next != null) {
-           if(current.data.compareTo(d) == 0) return true;
-           goToNext();
+        if (isEmpty()) return false;
+        int direction = d.compareTo(current.data);
+        if (direction > 0) return iterateRight(d);
+        else if(direction < 0) return iterateLeft(d);
+        return true;
+    }
+
+    private boolean iterateRight(E d) {
+        while(d.compareTo(current.data) > 0 ) {
+            if (isTail()) break;
+            goToNext();
+        }
+        int direction = d.compareTo(current.data);
+        if(direction == 0) return true;
+        else if (direction < 0) {
+            goToPrevious();
         }
         return false;
+    }
+
+    private boolean iterateLeft(E d) {
+        while(d.compareTo(current.data) < 0) {
+            if (isHead()) break;
+            goToPrevious();
+        }
+        return (d.compareTo(current.data) == 0);
     }
 
     @Override
@@ -169,7 +175,8 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
         LinkedList<E> listCopy = new LinkedList<>();
         goToFirst();
         for (int i = 0; i < size; i++) {
-            listCopy.insert(current.data);
+            E element = current.data;
+            listCopy.insert(element);
             goToNext();
         }
         current = oldCurrent;
