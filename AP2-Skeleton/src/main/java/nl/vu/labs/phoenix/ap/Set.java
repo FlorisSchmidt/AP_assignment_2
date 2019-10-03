@@ -10,11 +10,6 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 		init();
 	}
 
-	private Set(ListInterface<T> l) {
-		setList = l.copy();
-		size = l.size();
-	}
-
 	@Override
 	public void init() {
 		setList.init();
@@ -57,7 +52,10 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 
 	@Override
 	public SetInterface<T> copy() {
-		return new Set<T>(setList);
+		Set setCopy = new Set<T>();
+		setCopy.setList = this.setList.copy();
+		setCopy.size = this.size;
+		return setCopy;
 		}
 
 
