@@ -11,6 +11,7 @@ public interface InterpreterInterface<T> {
 	 * @return 
 	 * 	the set corresponding to var or null
 	 */
+
 	T getMemory(String var);
 	
 	/**

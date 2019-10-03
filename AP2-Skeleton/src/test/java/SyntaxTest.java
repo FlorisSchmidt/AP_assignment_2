@@ -9,7 +9,6 @@ import java.util.Scanner;
 import org.junit.Test;
 
 import nl.vu.labs.phoenix.ap.InterpreterInterface;
-import nl.vu.labs.phoenix.ap.Set;
 import nl.vu.labs.phoenix.ap.SetInterface;
 import nl.vu.labs.phoenix.ap.Interpreter;
 
@@ -18,7 +17,7 @@ public class SyntaxTest {
 
 	@Test
 	public void identifierTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// spacing inside the identifier test
 		interpreter.eval("M        ies = {123, 456, 789");
@@ -55,7 +54,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void spacesTest() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// ignore prefix spacing tests
 		SetInterface<BigInteger> actual = interpreter.eval("         ? {1,2}");
@@ -108,7 +107,7 @@ public class SyntaxTest {
 
 	@Test
 	public void emptyLineTest() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		SetInterface<BigInteger> actual = interpreter.eval("");
 		assertNull("an empty line should result in an exception and thus return Null", actual);
@@ -116,7 +115,7 @@ public class SyntaxTest {
 
 	@Test
 	public void priorityTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 
 		// same priority test			
 		SetInterface<BigInteger> actual = interpreter.eval("? {1, 2, 3} + {4, 5} | {2, 3, 4} - {5}");
@@ -131,7 +130,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void parenthesisBalanceTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		interpreter.eval("Ape = {1, 2, 3, 4, 5, 6, 7, 8, 9}");
 		
@@ -149,7 +148,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void breakLineTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		interpreter.eval("Mies = {1,2,3} / ");
 		interpreter.eval("+ {4,5}");
@@ -164,7 +163,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void doubleAssignmentTest() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		interpreter.eval("Ape = {1, 10, 100, 1000}          Wim = {3, 4}");
 		SetInterface<BigInteger> actual = interpreter.getMemory("Ape");
@@ -175,7 +174,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void referencingTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		interpreter.eval("Ape = {1,2,3,4,5,6,7,8,9}");
 		interpreter.eval("Nut = Ape");
@@ -201,7 +200,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void emptySetOperationsTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// empty union
 		SetInterface<BigInteger> actual = interpreter.eval("? {} + {}");
@@ -227,7 +226,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void naturalNumbersTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// 0 digit tests
 		SetInterface<BigInteger> actual = interpreter.eval("? {02}");
@@ -252,7 +251,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void duplicateElementsTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		SetInterface<BigInteger> actual = interpreter.eval("? {1, 2, 3, 2, 1}");
 		ArrayList<BigInteger> expected = convertExpectedList("1 2 3");
@@ -265,7 +264,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void setSyntaxTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// checking whether only natural numbers are accepted
 		SetInterface<BigInteger> actual = interpreter.eval("? {a,b,c,d}");
@@ -293,7 +292,7 @@ public class SyntaxTest {
 
 	@Test
 	public void operatorsTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// missing operators tests
 		SetInterface<BigInteger> actual = interpreter.eval("? ({}({1}))");
@@ -310,7 +309,7 @@ public class SyntaxTest {
 
 	@Test
 	public void endOfLineTest() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// Some parsers end an expression when a ')' is seen which should not happen.
 		SetInterface<BigInteger> actual = interpreter.eval("? {1,2})");
@@ -319,7 +318,7 @@ public class SyntaxTest {
 	
 	@Test
 	public void statementTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// Does the program detect that '=' is missing?
 		SetInterface<BigInteger> actual = interpreter.eval("Aap {1,2}");
@@ -342,7 +341,7 @@ public class SyntaxTest {
 
 	@Test
 	public void otherTests() {
-		InterpreterInterface<Set<BigInteger>> interpreter = new Interpreter<Set<BigInteger>>();
+		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
 		
 		// Test of term(): correct factor followed by a wrong factor
 		SetInterface<BigInteger> actual = interpreter.eval("?{1}*({1, 2, 3}");
