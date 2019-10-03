@@ -8,20 +8,39 @@ package nl.vu.labs.phoenix.ap;
 //        super(s);
 //    }
 //}
-public class APException extends Exception{
+class APException extends Exception{
     APException(String s){
         super(s);
     }
 }
 
 class StatementException extends APException {
-    public StatementException(String s) {
+    StatementException(String s) {
         super("Incorrect statement: "+s);
     }
 }
 
 class IdentifierException extends APException {
-    public IdentifierException(String s) {
+    IdentifierException(String s) {
         super("Incorrect identifier: "+s);
+    }
+}
+
+class ExpressionException extends APException {
+    ExpressionException(String s) {
+        super("Incorrect expression: "+s);
+    }
+}
+
+class NumberException extends APException {
+    NumberException(String s){
+        super("Incorrect number: "+s);
+
+    }
+}
+
+class NoSuchElementException extends APException {
+    NoSuchElementException(String s){
+        super("Memory doesn't contain:"+s);
     }
 }
