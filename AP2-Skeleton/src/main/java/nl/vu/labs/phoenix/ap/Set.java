@@ -74,7 +74,7 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 	@Override
 	public SetInterface<T> difference(SetInterface<T> s) {
 		Set<T> differences = new Set<>();
-		Set<T> subject = new Set<>(setList);
+		SetInterface<T> subject = this.copy();
 		for (int i = 0; i < size; i++) {
 			T element = subject.get();
 			subject.remove(element);
@@ -88,7 +88,7 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 	@Override
 	public SetInterface<T> intersection(SetInterface<T> s) {
 		Set<T> intersect = new Set<>();
-		Set<T> subject = new Set<>(setList);
+		SetInterface<T> subject = this.copy();
 		for (int i = 0; i < size; i++) {
 			T element = subject.get();
 			subject.remove(element);
@@ -102,7 +102,7 @@ public class Set<T extends Comparable<T>> implements SetInterface<T> {
 	@Override
 	public SetInterface<T> symDifference(SetInterface<T> s) {
 		Set<T> symDif = new Set<>();
-		Set<T> subject = new Set<>(setList);
+		SetInterface<T> subject = this.copy();
 		Set<T> comparand = (Set<T>) s.copy();
 		for (int i = 0; i < size; i++) {
 			T subjectElement = subject.get();
