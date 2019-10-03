@@ -1,41 +1,43 @@
 package nl.vu.labs.phoenix.ap;
 
+import java.io.PrintStream;
 import java.math.BigInteger;
+import java.util.Scanner;
 
 public class Main {
-	
+
+	PrintStream out;
+	InterpreterInterface<Set<BigInteger>> interpreter;
+
 	private void start() {
-		InterpreterInterface<SetInterface<BigInteger>> interpreter = new Interpreter<SetInterface<BigInteger>>();
-		
-	Set<Integer> setA = new Set<>();
-	Set<Integer> setB = new Set<>();
-	Integer a, b, c, d, e, f, g, h;
-	a = 1;
-	b = 2;
-	c = 3;
-	d = 4;
-	e = 3;
-	f = 4;
-	g = 5;
-	h = 6;
-	setA.add(a);
-	setA.add(b);
-	setA.add(c);
-	setA.add(d);
-	setB.add(e);
-	setB.add(f);
-	setB.add(g);
-	setB.add(h);
-	SetInterface<Integer> setC = setA.union(setB);
-	SetInterface<Integer> setD = setA.difference(setB);
-	SetInterface<Integer> setE = setA.intersection(setB);
-	SetInterface<Integer> setF = setA.symDifference(setB);
-	int x = 3;
+		interpreter = new Interpreter<Set<BigInteger>>();
+		out = new PrintStream(System.out);
 
-
+		promptUser();
 	}
-	
+
+	private void promptUser(){
+		out.print("Enter input:\n");
+		Scanner input = new Scanner(System.in);
+
+		while(input.hasNext()) {
+			String nextLine = input.nextLine();
+			if(nextLine.equals("")){
+				continue;
+			}
+
+			parseInput(nextLine);
+		}
+		input.close();
+	}
+
+	private void parseInput(String input){
+		Scanner inputScanner = new Scanner(input);
+		interpreter.eval(inputScanner.nextLine());
+	}
+
 	public static void main(String[] args) {
 		new Main().start();
 	}
+
 }
