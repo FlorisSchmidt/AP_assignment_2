@@ -2,7 +2,6 @@ package nl.vu.labs.phoenix.ap;
 
 import java.io.PrintStream;
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -14,11 +13,9 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 	PrintStream out = new PrintStream(System.out);
 	HashMap<Identifier, T> memory;
 
-
 	public Interpreter(){
 		memory = new HashMap<>();
 	}
-
 
 	@Override
 	public T getMemory(String v) {
@@ -32,7 +29,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 	@Override
 	public T eval(String s) {
-		Scanner input = new Scanner(s);
+		Scanner input = new Scanner(s.trim());
 		try{
 			parseStatement(input);
 		} catch (APException e){
@@ -55,112 +52,214 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 	}
 
 	private void parseStatement(Scanner input) throws APException {
-		String statement = input.next();
-		if(statement.equals("?")){
-			out.println("print statement");
-			parsePrintStatement(input);
-		} else if (statement.equals("\\")){
-			out.println("comment statement");
-		} else if (statement.matches("[a-zA-Z0-9]*")){
-			out.println("identifier statement");
-			parseIdentifierStatement(statement,input);
+		String statement = input.nextLine().trim();
+
+		if(statement.startsWith("?")){
+			out.println("Printing");
+			parsePrintStatement(statement);
+		} else if(statement.startsWith("/")){
+			out.println("comment");
 		} else {
-			throw new StatementException('"'+statement+'"' + " not supported");
+			parseIdentifierStatement(new Scanner(statement));
 		}
 	}
 
-	private void parsePrintStatement(Scanner input){
-//		String line = input.nextLine();
-//		parseOperator(line);
+	private void parsePrintStatement(String input) throws NoSuchElementException{
 
-		while(input.hasNext()){
-			String token = input.next();
+		if(input.length()!=1){
+			input = input.substring(1);
+		}
+		Scanner line = new Scanner(input);
+		while(line.hasNext()){
+			String token = line.next();
 			if(hasAndRemoveMemory(token, false)){
 				T set = getMemory(token);
-				out.print(set.get().toString());
+				printSet(set);
+			} else {
+				throw new NoSuchElementException(token);
 			}
 		}
 
 	}
 
-	private void parseIdentifierStatement(String statement, Scanner input) throws APException {
-		Identifier identifier = new Identifier();
-
-		for(int i = 0;i<statement.length();i++){
-			identifier.add(statement.charAt(i));
+	private void printSet(T set){
+		int size = set.size();
+		SetInterface setCopy = set.copy();
+		out.print("{ ");
+		for(int i = 0;i<size;i++){
+			out.print(setCopy.get().toString()+" ");
+			setCopy.remove(setCopy.get());
 		}
+		out.println("}");
+	}
+
+	private void parseIdentifierStatement(Scanner input) throws APException {
+		input.useDelimiter("=");
+		String identifierInput = input.next().trim();
+
+		if(identifierInput.contains(" ")){
+			throw new IdentifierException("no space between identifiers allowed");
+		}
+		Identifier identifier = makeIdentifier(identifierInput);
 
 		if(hasAndRemoveMemory(identifier.value(), true)){
 			memory.remove(identifier);
-			out.print("overwriting");
+			out.print("overwriting\n");
 		}
 		//TODO check if statement is filled
 		if(!input.hasNext()){
 			throw new StatementException("assignment expected");
 		}
-		if(!input.next().equals("=")){
-			throw new StatementException("spacing between identifiers is not allowed");
-		}
-
-		if(!input.hasNext()){
-			throw new StatementException("nothing to assign to");
-		}
-
 		parseExpression(input, identifier);
 	}
 
-	private void parseExpression(Scanner input, Identifier identifier) throws APException {
-		String expression = input.next();
+	private Identifier makeIdentifier(String name) throws IdentifierException {
+		Identifier id = new Identifier();
+		for(int i = 0;i<name.length();i++){
+			id.add(name.charAt(i));
+		}
+		return id;
+	}
 
-		if(expression.equals("(")){
+	private void parseExpression(Scanner input, Identifier identifier) throws APException {
+		String expression = input.next().trim();
+
+		if(expression.startsWith("(")){
 			parseComplexFactor(input, identifier);
-		} else if (expression.equals("{")){
-			parseNaturalNumbers(input, identifier);
-		} else if (expression.equals("[")){
+		} else if (expression.startsWith("{")){
+			Set set = parseNaturalNumbers(new Scanner(expression));
+			memory.put(identifier, (T) set);
+		} else if (expression.startsWith("[")){
 			parseSet(input);
-		} else if (expression.matches("[a-zA-Z0-9]")){
-			parseOperator(expression, input);
+		} else if (expression.contains("*")||expression.contains("+")){
+			parseOperator(new Scanner(expression));
 		} else {
 			throw new ExpressionException("");
 		}
 
 	}
 
-	void parseComplexFactor(Scanner input, Identifier identifier){
+	private void parseComplexFactor(Scanner input, Identifier identifier){
 
 	}
 
-	void parseNaturalNumbers(Scanner input, Identifier identifier) throws NumberException {
+	private Set parseNaturalNumbers(Scanner input) throws NumberException {
 		Set set = new Set<BigInteger>();
+
+		String line = input.nextLine().trim().substring(1);
+		if(line.startsWith(",")){
+			throw new NumberException("no element before first ,");
+		}
+		input = new Scanner(line);
+		input.useDelimiter(",");
+
 		while(input.hasNext()){
-			String token = input.next();
-			if(token.equals("}")){
-				break;
-			} else if (token.matches("[1-9]*")){
-				set.add(new BigInteger(token));
-			} else {
-				throw new NumberException(token);
+			String token = input.next().trim();
+			if(token.equals("")){
+				throw new NumberException("no element after ,");
 			}
+			if(token.contains(" ")){
+				throw new NumberException("no space between numbers allowed");
+			}
+
+			if(token.endsWith("}")){
+				if(input.hasNext()){
+					throw new NumberException("No element allowed after }");
+				} else if(token.length()==1) {
+					throw new NumberException("No element before }");
+				} else {
+					token = token.substring(0,token.length()-1);
+					set = addToSet(set,token);
+					continue;
+				}
+			}
+			set = addToSet(set,token);
 		}
-		memory.put(identifier, (T) set);
+		return set;
 	}
 
-	void parseSet(Scanner input){
-
-	}
-	private void parseOperator(String expression, Scanner input) throws NoSuchElementException {
-		if(!memory.containsKey(expression)){
-			throw new NoSuchElementException(expression);
+	private Set addToSet(Set set,String string) throws NumberException{
+		if(string.matches("[0-9]*")){
+			set.add(string);
+		} else {
+			throw new NumberException(string);
 		}
+		return set;
 	}
 
-	private void parseOperator(String line){
+	private void parseSet(Scanner input){
+
+	}
+
+	private void parseOperator(String expression, Scanner input) throws NoSuchElementException, IdentifierException {
+		String line = input.nextLine().trim();
+//		if(!memory.containsKey(expression)){
+//			throw new NoSuchElementException(expression);
+//		} else {
+//			T id = memory.get(expression);
+//
+//			memory.put();
+//		}
+	}
+
+	private void parseOperations(){
+	}
+
+	private String parseMultiplying(String line){
+		if(line.contains("*")){
+			addParentheses(line);
+		}
+		return line;
+	}
+
+	private String addParentheses(String line){
+
+		line = addOpeningParentheses(line);
+		return line;
+	}
+
+	private String addOpeningParentheses(String line){
+		int i = 0;
+		int adjacendLength = 0;
+		boolean opened = false;
+		boolean closed = false;
+		StringBuffer result = new StringBuffer(line);
+
+		for(;i<line.length();i++){
+			char c = line.charAt(i);
+
+			if(!opened){
+				if(c == '*'){
+					result.insert(i-adjacendLength,'(');
+					adjacendLength=0;
+					opened = true;
+				} else if (c == '+' || c=='-' || c=='|'){
+					adjacendLength=0;
+				} else {
+					adjacendLength++;
+				}
+			}
+			else {
+				if(c == '+' || c=='-' || c=='|'){
+					result.insert(i+adjacendLength,')');
+					closed=true;
+				} else {
+					adjacendLength++;
+				}
+			}
+
+		}
+		if(!closed){
+			result.append(')');
+		}
+		return result.toString();
+	}
+
+	private void parseOperator(Scanner input){
+		String line = input.nextLine();
 		if (line.contains("*")){
 			out.print("Detected a *");
-			//TODO add multiplying funcionality
+			line = parseMultiplying(line);
 		}
-
 	}
-
-
 }

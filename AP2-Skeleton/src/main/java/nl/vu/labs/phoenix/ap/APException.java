@@ -16,31 +16,31 @@ class APException extends Exception{
 
 class StatementException extends APException {
     StatementException(String s) {
-        super("Incorrect statement: "+s);
+        super("Incorrect statement: "+s+"\n");
     }
 }
 
 class IdentifierException extends APException {
     IdentifierException(String s) {
-        super("Incorrect identifier: "+s);
+        super("Incorrect identifier: "+s+"\n");
     }
 }
 
 class ExpressionException extends APException {
     ExpressionException(String s) {
-        super("Incorrect expression: "+s);
+        super("Incorrect expression: "+s+"\n");
     }
 }
 
 class NumberException extends APException {
     NumberException(String s){
-        super("Incorrect number: "+s);
+        super("Incorrect number: "+s+"\n");
 
     }
 }
 
 class NoSuchElementException extends APException {
     NoSuchElementException(String s){
-        super("Memory doesn't contain:"+s);
+        super("Memory doesn't contain:"+s+"\n");
     }
 }
