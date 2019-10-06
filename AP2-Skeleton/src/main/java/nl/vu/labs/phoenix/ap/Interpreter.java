@@ -1,5 +1,7 @@
 package nl.vu.labs.phoenix.ap;
 
+import com.sun.xml.internal.bind.v2.model.core.ID;
+
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -29,8 +31,9 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 	@Override
 	public T eval(String s) {
-		Scanner input = new Scanner(s.trim());
 		try{
+            s = removeUnnecessarySpace(s);
+            Scanner input = new Scanner(s);
 			parseStatement(input);
 		} catch (APException e){
 			out.print(e.getMessage());
@@ -52,7 +55,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 	}
 
 	private void parseStatement(Scanner input) throws APException {
-		String statement = input.nextLine().trim();
+		String statement = input.nextLine();
 
 		if(statement.startsWith("?")){
 			out.println("Printing");
@@ -95,7 +98,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 	private void parseIdentifierStatement(Scanner input) throws APException {
 		input.useDelimiter("=");
-		String identifierInput = input.next().trim();
+		String identifierInput = input.next();
 
 		if(identifierInput.contains(" ")){
 			throw new IdentifierException("no space between identifiers allowed");
@@ -213,12 +216,6 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 	}
 
 	private String addParentheses(String line){
-
-		line = addOpeningParentheses(line);
-		return line;
-	}
-
-	private String addOpeningParentheses(String line){
 		int i = 0;
 		int adjacendLength = 0;
 		boolean opened = false;
@@ -243,6 +240,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 				if(c == '+' || c=='-' || c=='|'){
 					result.insert(i+adjacendLength,')');
 					closed=true;
+					String remainingString = result.substring(i+adjacendLength);
 				} else {
 					adjacendLength++;
 				}
@@ -252,6 +250,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		if(!closed){
 			result.append(')');
 		}
+
 		return result.toString();
 	}
 
@@ -261,5 +260,35 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			out.print("Detected a *");
 			line = parseMultiplying(line);
 		}
+	}
+
+	private String removeUnnecessarySpace(String input) throws IdentifierException, NumberException {
+		input.trim();
+		boolean insideIdentifier = false;
+		boolean insideNumber = false;
+		boolean hasSpace = false;
+
+		for (int i = 0; i < input.length(); i++) {
+			String c = String.valueOf(input.charAt(i));
+			if(c.matches(" " ) && (insideIdentifier || insideNumber)){
+				hasSpace = true;
+			} else if(c.matches("[a-zA-z]")){
+				insideIdentifier = true;
+			} else if(c.matches("[0-9]")){
+				insideNumber = true;
+			} else {
+                insideIdentifier = false;
+                insideNumber = false;
+                hasSpace = false;
+            }
+
+			if(hasSpace && insideIdentifier && c.matches("[a-zA-z]")){
+				throw new IdentifierException(" no space between identifiers allowed");
+			}
+			if (hasSpace && insideNumber && c.matches("[0-9]")){
+				throw new NumberException("no space between numbers allowed");
+			}
+		}
+		return input.replaceAll("\\s+","");
 	}
 }
