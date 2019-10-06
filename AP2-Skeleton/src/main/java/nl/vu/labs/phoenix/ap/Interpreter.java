@@ -73,9 +73,15 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			input = input.substring(1);
 		}
 		Scanner line = new Scanner(input);
+
+
+
 		while(line.hasNext()){
 			String token = line.next();
-			if(hasAndRemoveMemory(token, false)){
+			if(token.contains("+")){
+				printSet(parseOperations(token));
+			}
+			if(hasAndRemoveMemory(token, false)){ //TODO doesn't count for +
 				T set = getMemory(token);
 				printSet(set);
 			} else {
@@ -85,7 +91,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 	}
 
-	private void printSet(T set){
+	private void printSet(SetInterface set){
 		int size = set.size();
 		SetInterface setCopy = set.copy();
 		out.print("{ ");
@@ -100,16 +106,12 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		input.useDelimiter("=");
 		String identifierInput = input.next();
 
-		if(identifierInput.contains(" ")){
-			throw new IdentifierException("no space between identifiers allowed");
-		}
 		Identifier identifier = makeIdentifier(identifierInput);
 
 		if(hasAndRemoveMemory(identifier.value(), true)){
 			memory.remove(identifier);
 			out.print("overwriting\n");
 		}
-		//TODO check if statement is filled
 		if(!input.hasNext()){
 			throw new StatementException("assignment expected");
 		}
@@ -125,25 +127,42 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 	}
 
 	private void parseExpression(Scanner input, Identifier identifier) throws APException {
-		String expression = input.next().trim();
+		String expression = input.next();
 
 		if(expression.startsWith("(")){
-			parseComplexFactor(input, identifier);
+			parseComplexFactor(expression, identifier);
 		} else if (expression.startsWith("{")){
 			Set set = parseNaturalNumbers(new Scanner(expression));
 			memory.put(identifier, (T) set);
 		} else if (expression.startsWith("[")){
-			parseSet(input);
+			//TODO create formula
+			//parseSet(input);
 		} else if (expression.contains("*")||expression.contains("+")){
 			parseOperator(new Scanner(expression));
 		} else {
-			throw new ExpressionException("");
+			throw new ExpressionException("Unsupported operation");
 		}
 
 	}
 
-	private void parseComplexFactor(Scanner input, Identifier identifier){
+	private String parseComplexFactor(String input, Identifier identifier){
+		// ((a+b)+c)
+		boolean opened = false;
+		StringBuffer content = new StringBuffer();
 
+		for(int i = 0;i<input.length();i++){
+			char c = input.charAt(i);
+			if(opened){
+				content.append(c);
+			}
+			if(c=='('){
+				opened=true;
+			}
+			if(c==')'){
+				return parseComplexFactor(content.toString(),identifier);
+			}
+		}
+		return null;
 	}
 
 	private Set parseNaturalNumbers(Scanner input) throws NumberException {
@@ -160,9 +179,6 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			String token = input.next().trim();
 			if(token.equals("")){
 				throw new NumberException("no element after ,");
-			}
-			if(token.contains(" ")){
-				throw new NumberException("no space between numbers allowed");
 			}
 
 			if(token.endsWith("}")){
@@ -190,22 +206,42 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		return set;
 	}
 
-	private void parseSet(Scanner input){
+	private SetInterface parseOperations(String line){
+		// only accepts type a+b
+		StringBuffer firstSet = new StringBuffer();
+		StringBuffer secondSet = new StringBuffer();
+		boolean fillingFirst = true;
+		char operation = '+';
 
+		for(int i = 0;i<line.length();i++){
+			char c = line.charAt(i);
+			if(c=='+' || c=='-' || c=='*' || c=='|'){
+				operation = c;
+				fillingFirst=false;
+			} else if(fillingFirst){
+				firstSet.append(c);
+			} else {
+				secondSet.append(c);
+			}
+		}
+		return calculateSet(firstSet.toString(),secondSet.toString(),operation);
 	}
 
-	private void parseOperator(String expression, Scanner input) throws NoSuchElementException, IdentifierException {
-		String line = input.nextLine().trim();
-//		if(!memory.containsKey(expression)){
-//			throw new NoSuchElementException(expression);
-//		} else {
-//			T id = memory.get(expression);
-//
-//			memory.put();
-//		}
-	}
+	private SetInterface calculateSet(String set1, String set2, char operation){
+		T first = getMemory(set1);
+		T second = getMemory(set2);
 
-	private void parseOperations(){
+		switch (operation){
+			case '+':
+				return first.union(second);
+			case '*':
+				return first.intersection(second);
+			case '-':
+				return first.difference(second);
+			case '|':
+				return first.symDifference(second);
+		}
+		return null;
 	}
 
 	private String parseMultiplying(String line){
@@ -215,6 +251,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		return line;
 	}
 
+	// Works
 	private String addParentheses(String line){
 		int i = 0;
 		int adjacendLength = 0;
@@ -240,17 +277,22 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 				if(c == '+' || c=='-' || c=='|'){
 					result.insert(i+adjacendLength,')');
 					closed=true;
-					String remainingString = result.substring(i+adjacendLength);
-				} else {
+					String remainingString = result.substring(i+adjacendLength+1);
+					if(remainingString.contains("*")){
+						result = new StringBuffer(result.substring(0,i+adjacendLength+1));
+						result.append(addParentheses(remainingString));
+					}
+				} else if (c == '*'){
+					adjacendLength = 0;
+				}
+				else {
 					adjacendLength++;
 				}
 			}
-
 		}
 		if(!closed){
 			result.append(')');
 		}
-
 		return result.toString();
 	}
 
