@@ -227,6 +227,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		if(sb.length()==0){
 			throw new NumberException("invalid set element: no element found");
 		}
+		if (sb.charAt(0) == '0' && sb.length() > 1) throw new NumberException("Number cannot start with 0");
 		return new BigInteger(sb.toString());
 	}
 
