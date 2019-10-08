@@ -56,27 +56,31 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			nextChar(s);
 			skipSpaces(s);
 			T expression = parseExpression(s);
+
+			if(s.hasNext()){
+				throw new AssignmentException("End of line expected");
+			}
 			removeMemory(id.value());
 			memory.put(id,expression);
 
 			if(expression.size()==0){
 				return null;
 			}
+
 			return expression;
 		} else {
 			throw new IdentifierException("Invalid character in identifier");
 		}
 	}
 
-	public boolean removeMemory(String v){
+	private void removeMemory(String v){
 		for(Identifier id : memory.keySet()){
 			if(id.value().equals(v)){
 				memory.remove(id);
-				return true;
+				return;
 			}
 		}
-		return false;
-	}
+    }
 
 
 	private T parsePrintStatement(Scanner s) throws APException {
@@ -84,6 +88,9 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		skipSpaces(s);
 		T expression = parseExpression(s);
 		printSet(expression);
+		if(s.hasNext()){
+			throw new SyntaxException("End of line expected");
+		}
 		return expression;
 	}
 
@@ -125,6 +132,10 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 				return term;
 			}
 
+			if(nextCharIs(s,')')){
+				return term;
+			}
+
 			operator = nextChar(s);
 			skipSpaces(s);
 			if(isAdditiveOperator(operator)) {
@@ -141,7 +152,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 						break;
 				}
 			} else {
-				throw new ExpressionException("");
+				throw new ExpressionException("Unknown ending");
 			}
 		}
 	}
@@ -187,16 +198,18 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		} else if (nextCharIs(s, '(')){
 			return parseComplexFactor(s);
 		} else {
-			throw new FactorException("factor not well formulated");
+			throw new FactorException("Factor not well formulated");
 		}
 	}
 
 	private T parseComplexFactor(Scanner s) throws APException {
 		nextChar(s);
+		skipSpaces(s);
 		T set = parseExpression(s);
 		if(!nextCharIs(s,')')){
-			throw new ComplexFactorException("no closing bracket found");
+			throw new ComplexFactorException("No closing bracket found");
 		}
+		nextChar(s);
 		return set;
 	}
 
@@ -213,7 +226,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 				if (nextCharIs(s, ',') || nextCharIs(s, '}')) {
 					break;
 				} else {
-					throw new NumberException(" space after number");
+					throw new NumberException("Space after number");
 				}
 			} else {
 				if(s.hasNext()){
@@ -225,7 +238,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			}
 		}
 		if(sb.length()==0){
-			throw new NumberException("invalid set element: no element found");
+			throw new NumberException("No element found");
 		}
 		if (sb.charAt(0) == '0' && sb.length() > 1) throw new NumberException("Number cannot start with 0");
 		return new BigInteger(sb.toString());

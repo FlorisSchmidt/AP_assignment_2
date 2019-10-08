@@ -14,9 +14,9 @@ class APException extends Exception{
     }
 }
 
-class StatementException extends APException {
-    StatementException(String s) {
-        super("Incorrect statement: "+s+"\n");
+class AssignmentException extends APException {
+    AssignmentException(String s) {
+        super("Incorrect assignment: "+s+"\n");
     }
 }
 
@@ -41,24 +41,24 @@ class NumberException extends APException {
 
 class NoSuchElementException extends APException {
     NoSuchElementException(String s){
-        super("Memory doesn't contain:"+s+"\n");
+        super("Memory doesn't contain: "+s+"\n");
     }
 }
 
 class SyntaxException extends APException {
     SyntaxException(String s){
-        super("Invalid syntax:"+s+"\n");
+        super("Invalid syntax: "+s+"\n");
     }
 }
 
 class FactorException extends APException {
     FactorException(String s){
-        super("Factor exception:"+s+"\n");
+        super("Factor exception: "+s+"\n");
     }
 }
 
 class ComplexFactorException extends APException {
     ComplexFactorException(String s){
-        super("Complex factor exception:"+s+"\n");
+        super("Complex factor exception: "+s+"\n");
     }
 }
