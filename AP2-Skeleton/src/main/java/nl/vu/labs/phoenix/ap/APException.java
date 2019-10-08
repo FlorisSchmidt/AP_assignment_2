@@ -44,3 +44,21 @@ class NoSuchElementException extends APException {
         super("Memory doesn't contain:"+s+"\n");
     }
 }
+
+class SyntaxException extends APException {
+    SyntaxException(String s){
+        super("Invalid syntax:"+s+"\n");
+    }
+}
+
+class FactorException extends APException {
+    FactorException(String s){
+        super("Factor exception:"+s+"\n");
+    }
+}
+
+class ComplexFactorException extends APException {
+    ComplexFactorException(String s){
+        super("Complex factor exception:"+s+"\n");
+    }
+}

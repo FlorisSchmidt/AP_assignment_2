@@ -1,28 +1,27 @@
 package nl.vu.labs.phoenix.ap;
 
-import com.sun.xml.internal.bind.v2.model.core.ID;
-
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
  * A set interpreter for sets of elements of type T
  */
 public class Interpreter<T extends SetInterface<BigInteger>> implements InterpreterInterface<T> {
 
-	PrintStream out = new PrintStream(System.out);
-	HashMap<Identifier, T> memory;
+	private PrintStream out = new PrintStream(System.out);
+	private HashMap<Identifier, T> memory;
 
-	public Interpreter(){
+	public Interpreter() {
 		memory = new HashMap<>();
 	}
 
 	@Override
 	public T getMemory(String v) {
-		for(Identifier id : memory.keySet()){
-			if(id.value().equals(v)){
+		for (Identifier id : memory.keySet()) {
+			if (id.value().equals(v)) {
 				return memory.get(id);
 			}
 		}
@@ -31,306 +30,237 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 	@Override
 	public T eval(String s) {
-		try{
-            s = removeUnnecessarySpace(s);
-            Scanner input = new Scanner(s);
-			parseStatement(input);
-		} catch (APException e){
+		try {
+			s = s.trim();
+			Scanner input = new Scanner(s);
+			input.useDelimiter("");
+			if(nextCharIs(input, '?')){
+				return parsePrintStatement(input);
+			} else if (nextCharIs(input, '/')){
+				return parseComment(input);
+			} else if (nextCharIsLetter(input)){
+				return parseAssignment(input);
+			} else {
+				throw new SyntaxException("Invalid starting character");
+			}
+		} catch (APException e) {
 			out.print(e.getMessage());
 		}
 		return null;
 	}
 
-	// TODO 2 functions in one?
-	public boolean hasAndRemoveMemory(String v, boolean remove){
+	private T parseAssignment(Scanner s) throws APException {
+		Identifier id = parseIdentifier(s);
+		skipSpaces(s);
+		if(nextCharIs(s,'=')){
+			nextChar(s);
+			skipSpaces(s);
+			T expression = parseExpression(s);
+			removeMemory(id.value());
+			memory.put(id,expression);
+
+			if(expression.size()==0){
+				return null;
+			}
+			return expression;
+		} else {
+			throw new IdentifierException("Invalid character in identifier");
+		}
+	}
+
+	public boolean removeMemory(String v){
 		for(Identifier id : memory.keySet()){
 			if(id.value().equals(v)){
-				if(remove){
-					memory.remove(id);
-				}
+				memory.remove(id);
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private void parseStatement(Scanner input) throws APException {
-		String statement = input.nextLine();
 
-		if(statement.startsWith("?")){
-			out.println("Printing");
-			parsePrintStatement(statement);
-		} else if(statement.startsWith("/")){
-			out.println("comment");
-		} else {
-			parseIdentifierStatement(new Scanner(statement));
-		}
+	private T parsePrintStatement(Scanner s) throws APException {
+		nextChar(s);
+		skipSpaces(s);
+		T expression = parseExpression(s);
+		printSet(expression);
+		return expression;
 	}
 
-	private void parsePrintStatement(String input) throws NoSuchElementException{
-
-		if(input.length()!=1){
-			input = input.substring(1);
-		}
-		Scanner line = new Scanner(input);
-
-
-
-		while(line.hasNext()){
-			String token = line.next();
-			if(token.contains("+")){
-				printSet(parseOperations(token));
-			}
-			if(hasAndRemoveMemory(token, false)){ //TODO doesn't count for +
-				T set = getMemory(token);
-				printSet(set);
-			} else {
-				throw new NoSuchElementException(token);
-			}
-		}
-
-	}
-
-	private void printSet(SetInterface set){
-		int size = set.size();
-		SetInterface setCopy = set.copy();
-		out.print("{ ");
-		for(int i = 0;i<size;i++){
-			out.print(setCopy.get().toString()+" ");
+	private void printSet(SetInterface s){
+		StringBuffer sb = new StringBuffer("{ ");
+		SetInterface setCopy = s.copy();
+		for(int i = 0;i<s.size();i++){
+			sb.append(setCopy.get().toString()).append(" ");
 			setCopy.remove(setCopy.get());
 		}
-		out.println("}");
+		sb.append("}");
+		System.out.println(sb.toString());
 	}
 
-	private void parseIdentifierStatement(Scanner input) throws APException {
-		input.useDelimiter("=");
-		String identifierInput = input.next();
-
-		Identifier identifier = makeIdentifier(identifierInput);
-
-		if(hasAndRemoveMemory(identifier.value(), true)){
-			memory.remove(identifier);
-			out.print("overwriting\n");
-		}
-		if(!input.hasNext()){
-			throw new StatementException("assignment expected");
-		}
-		parseExpression(input, identifier);
+	private T parseComment(Scanner s) {
+		System.out.println(s.nextLine());
+		return null;
 	}
 
-	private Identifier makeIdentifier(String name) throws IdentifierException {
+	private Identifier parseIdentifier(Scanner s) throws IdentifierException {
 		Identifier id = new Identifier();
-		for(int i = 0;i<name.length();i++){
-			id.add(name.charAt(i));
+		if(!nextCharIsLetter(s)){
+			throw new IdentifierException("No a valid identifier");
+		}
+		while (nextCharIsLetter(s) || nextCharIsDigit(s)){
+			id.add(nextChar(s));
 		}
 		return id;
 	}
 
-	private void parseExpression(Scanner input, Identifier identifier) throws APException {
-		String expression = input.next();
+	private T parseExpression(Scanner s) throws APException {
+		T term = parseTerm(s);
+		T term2;
+		char operator;
+		while(true) {
+			skipSpaces(s);
 
-		if(expression.startsWith("(")){
-			parseComplexFactor(expression, identifier);
-		} else if (expression.startsWith("{")){
-			Set set = parseNaturalNumbers(new Scanner(expression));
-			memory.put(identifier, (T) set);
-		} else if (expression.startsWith("[")){
-			//TODO create formula
-			//parseSet(input);
-		} else if (expression.contains("*")||expression.contains("+")){
-			parseOperator(new Scanner(expression));
+			if(!s.hasNext()){
+				return term;
+			}
+
+			operator = nextChar(s);
+			skipSpaces(s);
+			if(isAdditiveOperator(operator)) {
+				term2 = parseTerm(s);
+				switch(operator){
+					case '+':
+						term = (T) term.union(term2);
+						break;
+					case '-':
+						term = (T) term.difference(term2);
+						break;
+					case '|':
+						term = (T) term.symDifference(term2);
+						break;
+
+				}
+			}
+		}
+	}
+
+	private void skipSpaces(Scanner s){
+		while(nextCharIs(s, ' ')) {
+			nextChar(s);
+		}
+	}
+
+	private T parseTerm(Scanner s) throws APException {
+		T factor = parseFactor(s);
+		T factor2;
+		while(true) {
+			skipSpaces(s);
+			if(!s.hasNext()){
+				return factor;
+			}
+
+			if(nextCharIs(s,'*')){
+				nextChar(s);
+				skipSpaces(s);
+				factor2 = parseFactor(s);
+				factor = (T) factor.intersection(factor2);
+			} else {
+				break;
+			}
+		}
+		return factor;
+	}
+
+	private T parseFactor(Scanner s) throws APException {
+		T set;
+		if(nextCharIsLetter(s)) {
+			Identifier id = parseIdentifier(s);
+			set = getMemory(id.value());
+			if(set==null) {
+				throw new NoSuchElementException(id.value() + "doesn't exist");
+			}
+			return set;
+		} else if (nextCharIs(s,'{')){
+			return parseSet(s);
+		} else if (nextCharIs(s, '(')){
+			return parseComplexFactor(s);
 		} else {
-			throw new ExpressionException("Unsupported operation");
+			throw new FactorException("factor not well formulated");
 		}
-
 	}
 
-	private String parseComplexFactor(String input, Identifier identifier){
-		// ((a+b)+c)
-		boolean opened = false;
-		StringBuffer content = new StringBuffer();
-
-		for(int i = 0;i<input.length();i++){
-			char c = input.charAt(i);
-			if(opened){
-				content.append(c);
-			}
-			if(c=='('){
-				opened=true;
-			}
-			if(c==')'){
-				return parseComplexFactor(content.toString(),identifier);
-			}
+	private T parseComplexFactor(Scanner s) throws APException {
+		nextChar(s);
+		T set = parseExpression(s);
+		if(!nextCharIs(s,')')){
+			throw new ComplexFactorException("no closing bracket found");
 		}
-		return null;
+		return set;
 	}
 
-	private Set parseNaturalNumbers(Scanner input) throws NumberException {
+	private BigInteger parseNaturalNumber(Scanner s) throws NumberException, SyntaxException {
+		skipSpaces(s);
+		StringBuffer sb = new StringBuffer();
+		while(true){
+			if(nextCharIsDigit(s)){
+				sb.append(nextChar(s));
+			} else if (nextCharIs(s,',') || nextCharIs(s,'}')){
+				break;
+			} else if (nextCharIs(s,' ')) {
+				skipSpaces(s);
+				if (nextCharIs(s, ',') || nextCharIs(s, '}')) {
+					break;
+				} else {
+					throw new NumberException(" space after number");
+				}
+			} else {
+				if(s.hasNext()){
+					throw new NumberException(nextChar(s)+" is not supported");
+				} else {
+					throw new SyntaxException("Unexpected end of line");
+				}
+
+			}
+		}
+		if(sb.length()==0){
+			throw new NumberException("invalid set element: no element found");
+		}
+		return new BigInteger(sb.toString());
+	}
+
+	private T parseSet(Scanner s) throws APException {
 		Set set = new Set<BigInteger>();
-
-		String line = input.nextLine().trim().substring(1);
-		if(line.startsWith(",")){
-			throw new NumberException("no element before first ,");
-		}
-		input = new Scanner(line);
-		input.useDelimiter(",");
-
-		while(input.hasNext()){
-			String token = input.next().trim();
-			if(token.equals("")){
-				throw new NumberException("no element after ,");
+		nextChar(s);
+		skipSpaces(s);
+		while(!nextCharIs(s,'}')){
+			set.add(parseNaturalNumber(s));
+			if(nextCharIs(s,'}')) break;
+			if(!s.hasNext()){
+				throw new FactorException("No closing bracket");
 			}
-
-			if(token.endsWith("}")){
-				if(input.hasNext()){
-					throw new NumberException("No element allowed after }");
-				} else if(token.length()==1) {
-					throw new NumberException("No element before }");
-				} else {
-					token = token.substring(0,token.length()-1);
-					set = addToSet(set,token);
-					continue;
-				}
-			}
-			set = addToSet(set,token);
+			nextChar(s);
 		}
-		return set;
+		return (T) set;
 	}
 
-	private Set addToSet(Set set,String string) throws NumberException{
-		if(string.matches("[0-9]*")){
-			set.add(string);
-		} else {
-			throw new NumberException(string);
-		}
-		return set;
+	private boolean isAdditiveOperator(char c){
+		return c == '+' || c == '|' || c == '-';
 	}
 
-	private SetInterface parseOperations(String line){
-		// only accepts type a+b
-		StringBuffer firstSet = new StringBuffer();
-		StringBuffer secondSet = new StringBuffer();
-		boolean fillingFirst = true;
-		char operation = '+';
-
-		for(int i = 0;i<line.length();i++){
-			char c = line.charAt(i);
-			if(c=='+' || c=='-' || c=='*' || c=='|'){
-				operation = c;
-				fillingFirst=false;
-			} else if(fillingFirst){
-				firstSet.append(c);
-			} else {
-				secondSet.append(c);
-			}
-		}
-		return calculateSet(firstSet.toString(),secondSet.toString(),operation);
+	private char nextChar(Scanner in) {
+		return in.next().charAt(0);
 	}
 
-	private SetInterface calculateSet(String set1, String set2, char operation){
-		T first = getMemory(set1);
-		T second = getMemory(set2);
-
-		switch (operation){
-			case '+':
-				return first.union(second);
-			case '*':
-				return first.intersection(second);
-			case '-':
-				return first.difference(second);
-			case '|':
-				return first.symDifference(second);
-		}
-		return null;
+	private boolean nextCharIs(Scanner in,char c) {
+		return in.hasNext(Pattern.quote(c+""));
 	}
 
-	private String parseMultiplying(String line){
-		if(line.contains("*")){
-			addParentheses(line);
-		}
-		return line;
+	private boolean nextCharIsDigit(Scanner in) {
+		return in.hasNext("[0-9]");
 	}
 
-	// Works
-	private String addParentheses(String line){
-		int i = 0;
-		int adjacendLength = 0;
-		boolean opened = false;
-		boolean closed = false;
-		StringBuffer result = new StringBuffer(line);
-
-		for(;i<line.length();i++){
-			char c = line.charAt(i);
-
-			if(!opened){
-				if(c == '*'){
-					result.insert(i-adjacendLength,'(');
-					adjacendLength=0;
-					opened = true;
-				} else if (c == '+' || c=='-' || c=='|'){
-					adjacendLength=0;
-				} else {
-					adjacendLength++;
-				}
-			}
-			else {
-				if(c == '+' || c=='-' || c=='|'){
-					result.insert(i+adjacendLength,')');
-					closed=true;
-					String remainingString = result.substring(i+adjacendLength+1);
-					if(remainingString.contains("*")){
-						result = new StringBuffer(result.substring(0,i+adjacendLength+1));
-						result.append(addParentheses(remainingString));
-					}
-				} else if (c == '*'){
-					adjacendLength = 0;
-				}
-				else {
-					adjacendLength++;
-				}
-			}
-		}
-		if(!closed){
-			result.append(')');
-		}
-		return result.toString();
-	}
-
-	private void parseOperator(Scanner input){
-		String line = input.nextLine();
-		if (line.contains("*")){
-			out.print("Detected a *");
-			line = parseMultiplying(line);
-		}
-	}
-
-	private String removeUnnecessarySpace(String input) throws IdentifierException, NumberException {
-		input.trim();
-		boolean insideIdentifier = false;
-		boolean insideNumber = false;
-		boolean hasSpace = false;
-
-		for (int i = 0; i < input.length(); i++) {
-			String c = String.valueOf(input.charAt(i));
-			if(c.matches(" " ) && (insideIdentifier || insideNumber)){
-				hasSpace = true;
-			} else if(c.matches("[a-zA-z]")){
-				insideIdentifier = true;
-			} else if(c.matches("[0-9]")){
-				insideNumber = true;
-			} else {
-                insideIdentifier = false;
-                insideNumber = false;
-                hasSpace = false;
-            }
-
-			if(hasSpace && insideIdentifier && c.matches("[a-zA-z]")){
-				throw new IdentifierException(" no space between identifiers allowed");
-			}
-			if (hasSpace && insideNumber && c.matches("[0-9]")){
-				throw new NumberException("no space between numbers allowed");
-			}
-		}
-		return input.replaceAll("\\s+","");
+	private boolean nextCharIsLetter(Scanner in) {
+		return in.hasNext("[a-zA-Z]");
 	}
 }
