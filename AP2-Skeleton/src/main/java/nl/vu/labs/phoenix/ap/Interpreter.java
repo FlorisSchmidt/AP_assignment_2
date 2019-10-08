@@ -139,8 +139,9 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 					case '|':
 						term = (T) term.symDifference(term2);
 						break;
-
 				}
+			} else {
+				throw new ExpressionException("");
 			}
 		}
 	}
@@ -235,12 +236,15 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		skipSpaces(s);
 		while(!nextCharIs(s,'}')){
 			set.add(parseNaturalNumber(s));
-			if(nextCharIs(s,'}')) break;
+			if(nextCharIs(s,'}')) {
+				break;
+			}
 			if(!s.hasNext()){
 				throw new FactorException("No closing bracket");
 			}
 			nextChar(s);
 		}
+		nextChar(s);
 		return (T) set;
 	}
 
