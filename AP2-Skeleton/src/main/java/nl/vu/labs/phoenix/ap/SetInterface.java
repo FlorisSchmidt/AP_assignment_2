@@ -1,111 +1,69 @@
 package nl.vu.labs.phoenix.ap;
 
-/** @elements
- *    objects of type T
- *  @structure
- *    none
- *  @domain
- *    All elements are unique.
- *  @constructor
- *    There is a default constructor that creates an empty set
- *  @precondition
- *    --
- *  @postcondition
- *    The new Set-object is the empty set
+/*
+ * Elements: Objects of type T.
+ * Structure: none
+ * Domain: All elements must be unique.
  *
- **/
+ * constructors
+ *
+ * Set();
+ *   PRE  -
+ *   POST - A new Set-object has been made and contains the empty set.
+ *
+ */
 public interface SetInterface<T extends Comparable<T>> {
 
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *    set-POST is empty and has been returned.
-	 **/
+	/*  PRE -
+       POST - The set is empty
+    */
 	void init();
 
-
-	/** @precondition
-	 *    The size of the set is less than 20.
-	 *  @postcondition
-	 *    Element t has been added to set-PRE.
-	 *    @return 	true: element has been added.
-	 *    			false: element has not been added.
-	 **/
+	/*  PRE - The size of the set is less than 20
+        POST - The element has been added to the set
+               @return  True: if element has been added
+                        False: if element has not been added
+     */
 	boolean add(T t);
 
 
-	/** @precondition
-	 *    The set is not empty.
-	 *  @postcondition
-	 *    A random element in the set has been returned.
-	 */
+	/*  PRE - The set is not empty
+        POST - Returns and removes an element from the set
+     */
 	T get();
 
-	/** @precondition
-	 *    The set is not empty.
-	 *  @postcondition
-	 *    The element passed as argument is not contained in Set-POST
-	 * @return  true: The element passed as argument was contained in Set-PRE and has been removed.
-	 * 			false: The element passed as argument was not contained in Set-PRE and has not been removed.
-	 *
-	 **/
+	/*  PRE - The set is not empty
+        POST - Returns and removes specified element from the set
+     */
 	boolean remove(T t);
 
-
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *    The number of elements in the set has been returned.
-	 **/
+	/*  PRE -
+       POST - The amount of elements in the set has been returned
+    */
 	int size();
 
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *  @return true: The set contains the identifier passed as argument.
-	 *    		false: The set does not contain identifier passed as argument.
-	 **/
 	boolean contains(T t);
 
-
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *    A copy of the set has been returned.
-	 */
 	SetInterface<T> copy();
 
-
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *    A set containing the union of the argument set and this has been returned.
-	 */
 	SetInterface<T> union(SetInterface<T> s);
+    /*  PRE -
+        POST - A set containing the union of the argument set and this.
+     */
 
-
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *    A set containing the difference of the argument and this has been returned.
-	 */
 	SetInterface<T> difference(SetInterface<T> s);
+    /*  PRE -
+        POST - A set containing the difference of the argument and this.
+     */
 
-
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *    A set containing the intersection of the argument set and this has been returned.
-	 */
 	SetInterface<T> intersection(SetInterface<T> s);
+    /*  PRE -
+        POST - A set containing the intersection of the argument and this.
+     */
 
-
-	/** @precondition
-	 *    --
-	 *  @postcondition
-	 *    A set containing the symmetric difference between the argument set and this has been returned.
-	 */
 	SetInterface<T> symDifference(SetInterface<T> s);
-
+    /*  PRE -
+        POST - A set containing the symmetric difference between the argument set
+     */
 }
 

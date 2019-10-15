@@ -13,6 +13,13 @@ public class Identifier implements IdentifierInterface {
 		init();
 	}
 
+	Identifier(Identifier src){
+		sb = new StringBuffer();
+		addWasCalled = src.addWasCalled;
+		sb.append(src.value());
+
+	}
+
 	@Override
 	public void init() {
 		sb.delete(0,sb.length());

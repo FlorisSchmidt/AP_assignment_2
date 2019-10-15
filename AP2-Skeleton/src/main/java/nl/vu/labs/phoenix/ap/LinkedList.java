@@ -169,6 +169,7 @@ public class LinkedList<E extends Comparable<E>> implements ListInterface<E> {
     }
 
     @Override
+    // current implementation makes shallow copy
     public ListInterface<E> copy() {
         Node oldCurrent = current;
         LinkedList<E> listCopy = new LinkedList<>();
