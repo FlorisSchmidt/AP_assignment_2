@@ -97,7 +97,7 @@ interface ListInterface<E extends Comparable<E>> {
      *    --
      *  @postcondition
      *    FALSE: list is empty
-     *     TRUE: current points to the first element
+     *    TRUE: current points to the first element
      **/
     boolean goToFirst();
 
@@ -106,7 +106,7 @@ interface ListInterface<E extends Comparable<E>> {
      *    --
      *  @postcondition
      *    FALSE: list is empty
-     *     TRUE: current points to the last element
+     *    TRUE: current points to the last element
      */
     boolean goToLast();
 
@@ -115,7 +115,7 @@ interface ListInterface<E extends Comparable<E>> {
      *    --
      *  @postcondition
      *    FALSE: list is empty or current points to the last element
-     *     TRUE: current-POST points to the next element of current-PRE
+     *    TRUE: current-POST points to the next element of current-PRE
      */
     boolean goToNext();
 
@@ -124,9 +124,10 @@ interface ListInterface<E extends Comparable<E>> {
      *    --
      *  @postcondition
      *    FALSE: list is empty of current points to the first element
-     *     TRUE: current-POST points to the prior element of current-PRE
+     *    TRUE: current-POST points to the prior element of current-PRE
      */
     boolean goToPrevious();
+
 
     /** @precondition
      *    --
