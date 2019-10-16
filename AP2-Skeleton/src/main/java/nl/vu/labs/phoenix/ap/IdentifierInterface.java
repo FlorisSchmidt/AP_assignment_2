@@ -22,7 +22,8 @@ public interface IdentifierInterface {
 	/** @precondition
 	 *    --
 	 *  @postcondition
-	 *    Identifier-POST contains only the character 'c'
+	 *    Identifier-POST contains only one temporary character. This character will be substituted
+	 *    with the first character added after usage of this method.
 	 **/
 	void init();
 
@@ -30,19 +31,19 @@ public interface IdentifierInterface {
 	/** @precondition
 	 *   --
 	 *  @postcondition
-	 *    Element t has been added to Identifier-PRE.
+	 *    If char coheres to domain requirements, it is present in Identifier-POST
 	 *    @return 	true: element has been added.
 	 *    			false: element has not been added.
+	 *    			failure: IdentifierException
+	 *
 	 **/
 	boolean add(char c) throws IdentifierException;
 
 
 	/** @precondition
-	 *    The identifier is not empty.
+	 *  --
 	 *  @postcondition
-	 *
-	 * @return a String-object with the concatenation of the added chars.
-	 *
+	 *  @return a String-object with the concatenation of the added chars.
 	 **/
 	String value();
 
@@ -50,7 +51,7 @@ public interface IdentifierInterface {
 	/** @precondition
 	 *    --
 	 *  @postcondition
-	 *    @return An integer representing the number of characters in the identifier.
+	 *  @return An integer representing the number of characters in the identifier.
 	 **/
 	int size();
 

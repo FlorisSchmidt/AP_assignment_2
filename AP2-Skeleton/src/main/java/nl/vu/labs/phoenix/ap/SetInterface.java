@@ -25,26 +25,27 @@ public interface SetInterface<T extends Comparable<T>> {
 
 
 	/** @precondition
-	 *    The size of the set is less than 20.
+	 *   --
 	 *  @postcondition
-	 *    Element t has been added to set-PRE.
+	 *    Element t is present in set-POST
 	 *    @return 	true: element has been added.
-	 *    			false: element has not been added.
+	 *    			false: element has not been added because it was already present.
+	 *
 	 **/
 	boolean add(T t);
 
 
 	/** @precondition
-	 *    The set is not empty.
-	 *  @postcondition
-	 *    A random element in the set has been returned.
+	 *  --
+	 * @postcondition
+	 * @return an element in the set.
 	 */
 	T get();
 
 	/** @precondition
 	 *    The set is not empty.
 	 *  @postcondition
-	 *    The element passed as argument is not contained in Set-POST
+	 *    Element t is not contained in Set-POST
 	 * @return  true: The element passed as argument was contained in Set-PRE and has been removed.
 	 * 			false: The element passed as argument was not contained in Set-PRE and has not been removed.
 	 *
@@ -79,7 +80,7 @@ public interface SetInterface<T extends Comparable<T>> {
 	/** @precondition
 	 *    --
 	 *  @postcondition
-	 *    A set containing the union of the argument set and this has been returned.
+	 *  @return a set containing the union of the argument and this.
 	 */
 	SetInterface<T> union(SetInterface<T> s);
 
@@ -87,7 +88,7 @@ public interface SetInterface<T extends Comparable<T>> {
 	/** @precondition
 	 *    --
 	 *  @postcondition
-	 *    A set containing the difference of the argument and this has been returned.
+	 *  @return a set containing the difference of the argument and this.
 	 */
 	SetInterface<T> difference(SetInterface<T> s);
 
@@ -95,7 +96,7 @@ public interface SetInterface<T extends Comparable<T>> {
 	/** @precondition
 	 *    --
 	 *  @postcondition
-	 *    A set containing the intersection of the argument set and this has been returned.
+	 *  @return a set containing the intersection of the argument and this.
 	 */
 	SetInterface<T> intersection(SetInterface<T> s);
 
@@ -103,7 +104,7 @@ public interface SetInterface<T extends Comparable<T>> {
 	/** @precondition
 	 *    --
 	 *  @postcondition
-	 *    A set containing the symmetric difference between the argument set and this has been returned.
+	 *  @return a set containing the symmetric difference of the argument and this.
 	 */
 	SetInterface<T> symDifference(SetInterface<T> s);
 
