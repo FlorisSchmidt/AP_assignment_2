@@ -28,6 +28,15 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		return null;
 	}
 
+	private void removeMemory(String v){
+		for(Identifier id : memory.keySet()){
+			if(id.value().equals(v)){
+				memory.remove(id);
+				return;
+			}
+		}
+	}
+
 	@Override
 	public T eval(String s) {
 		try {
@@ -55,8 +64,8 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		if(nextCharIs(s,'=')){
 			nextChar(s);
 			skipSpaces(s);
-			T expression = parseExpression(s);
 
+			T expression = parseExpression(s);
 			if(s.hasNext()){
 				throw new AssignmentException("End of line expected");
 			}
@@ -72,15 +81,6 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			throw new IdentifierException("Invalid character in identifier");
 		}
 	}
-
-	private void removeMemory(String v){
-		for(Identifier id : memory.keySet()){
-			if(id.value().equals(v)){
-				memory.remove(id);
-				return;
-			}
-		}
-    }
 
 
 	private T parsePrintStatement(Scanner s) throws APException {
@@ -112,9 +112,6 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 	private Identifier parseIdentifier(Scanner s) throws IdentifierException {
 		Identifier id = new Identifier();
-		if(!nextCharIsLetter(s)){
-			throw new IdentifierException("No a valid identifier");
-		}
 		while (nextCharIsLetter(s) || nextCharIsDigit(s)){
 			id.add(nextChar(s));
 		}
@@ -128,16 +125,13 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		while(true) {
 			skipSpaces(s);
 
-			if(!s.hasNext()){
-				return term;
-			}
-
-			if(nextCharIs(s,')')){
+			if(!s.hasNext() || nextCharIs(s,')')){
 				return term;
 			}
 
 			operator = nextChar(s);
 			skipSpaces(s);
+
 			if(isAdditiveOperator(operator)) {
 				term2 = parseTerm(s);
 				switch(operator){
@@ -154,12 +148,6 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			} else {
 				throw new ExpressionException("Unknown ending");
 			}
-		}
-	}
-
-	private void skipSpaces(Scanner s){
-		while(nextCharIs(s, ' ')) {
-			nextChar(s);
 		}
 	}
 
@@ -253,9 +241,6 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			if(nextCharIs(s,'}')) {
 				break;
 			}
-			if(!s.hasNext()){
-				throw new FactorException("No closing bracket");
-			}
 			nextChar(s);
 		}
 		nextChar(s);
@@ -264,6 +249,12 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 	private boolean isAdditiveOperator(char c){
 		return c == '+' || c == '|' || c == '-';
+	}
+
+	private void skipSpaces(Scanner s){
+		while(nextCharIs(s, ' ')) {
+			nextChar(s);
+		}
 	}
 
 	private char nextChar(Scanner in) {
