@@ -22,13 +22,8 @@ public class Main {
 
 		while(input.hasNext()) {
 			String nextLine = input.nextLine();
-			if(nextLine.equals("")){
-				continue;
-			}
-
 			parseInput(nextLine);
 		}
-		input.close();
 	}
 
 	private void parseInput(String input){
