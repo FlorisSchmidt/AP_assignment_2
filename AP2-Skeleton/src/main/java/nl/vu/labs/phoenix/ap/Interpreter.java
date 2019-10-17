@@ -110,7 +110,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		return null;
 	}
 
-	private Identifier parseIdentifier(Scanner s) throws IdentifierException {
+	private Identifier parseIdentifier(Scanner s){
 		Identifier id = new Identifier();
 		while (nextCharIsLetter(s) || nextCharIsDigit(s)){
 			id.add(nextChar(s));
@@ -178,7 +178,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 			Identifier id = parseIdentifier(s);
 			set = getMemory(id.value());
 			if(set==null) {
-				throw new NoSuchElementException(id.value() + "doesn't exist");
+				throw new NoSuchElementException(id.value());
 			}
 			return set;
 		} else if (nextCharIs(s,'{')){
@@ -201,7 +201,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 		return set;
 	}
 
-	private BigInteger parseNaturalNumber(Scanner s) throws NumberException, SyntaxException {
+	private BigInteger parseNaturalNumber(Scanner s) throws APException {
 		skipSpaces(s);
 		StringBuffer sb = new StringBuffer();
 		while(true){
