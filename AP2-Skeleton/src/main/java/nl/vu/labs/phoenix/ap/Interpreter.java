@@ -78,7 +78,7 @@ public class Interpreter<T extends SetInterface<BigInteger>> implements Interpre
 
 			return expression;
 		} else {
-			throw new IdentifierException("Invalid character in identifier");
+			throw new IdentifierException("equals sign expected");
 		}
 	}
 
